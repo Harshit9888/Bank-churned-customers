@@ -1,0 +1,64 @@
+--Bank churned customers : Exited>> 1= churned(left) , 0= stayed
+
+--1. Overall churned ? 
+--(so overall churned meaning you are going to find 
+--Attrition Rate (%) = Number of Employees Who Left*100 ÷ Average Number of Employees )
+select count(*) as total_customers , sum(exited) as total_churned,
+ sum(exited)*100 /count(*), 2) as overall_churned from Bank_churn;
+ -- we used sum(exited) coz exited are in 0,1 and know 0= stayed and 1= churned(left) 
+ --so by doing this we can find total churned just by doing this
+
+--2. Churn rate by country ?
+select Geography, count(*) as total_customer , sum(Exited) as total_churned ,
+round(sum(exited)*100/count(*),2) as country_churned
+ from Bank_churn group by Geography order by country_churned DESC;
+ 
+ --3. Churn rate by Gender?
+ select  Gender , count(*) as total_customer , sum(exited) as total_churned , 
+ sum(exited)*100/count(*) as churn_rate from Bank_churn group by gender;
+ 
+ --4. Churn by age group?
+select  Age , count(*) as total_customer , sum(exited) as total_churned , 
+ sum(exited)*100/count(*) as churn_rate from Bank_churn group by Age 
+ order by  Age ;
+ 
+ --same thing with more accuracy  by using case function.
+ select case 
+    when Age < 20 then 'Under_age'
+    when Age BETWEEN 20 and 30 then '20-30'
+    when Age BETWEEN 30 and 35 then '30-35'
+    when Age BETWEEN 35 and 40 then '35-40'
+    when Age BETWEEN 40 and 45 then '40-45'
+    when Age BETWEEN 45 and 50 then '45-50'
+    when Age BETWEEN 50 and 60 then '50-60'
+    ELSE 'Above 60'
+    END AS AGE_GROUP, count(*) as total_customer , sum(exited) as total_churned , 
+ sum(exited)*100/count(*) as churn_rate from Bank_churn group by AGE_GROUP
+ order by churn_rate desc ; 
+ 
+--5. Do active members churn less?
+--in isactivemembers: 
+--1 → customer actively uses the bank (logs in, makes transactions, uses services)
+-- 0 → customer has an account but rarely uses it (inactive)
+select IsActiveMember , count(*) as total_members , sum(Exited) as total_churn , 
+sum(Exited) *100/ count(*) as churn_rate from Bank_churn group by IsActiveMember
+order by churn_rate desc;
+
+--6.churn by number of products?
+select NumOfProducts, count(*) as total_members , sum(Exited) as total_churn , 
+round(sum(Exited) *100/ count(*) , 2)as churn_rate
+ from Bank_churn group by NumOfProducts
+order by churn_rate desc;
+
+--7.  High Balance Customers Who Churned?
+select case 
+when Balance = 0 then 'zero balance'
+ when Balance < 50000 then 'low balance(under 50k)'
+ when Balance BETWEEN 50000 and 100000 then 'Mid Balance(50k-100k)'
+ ELSE 'High balance(<100k)'
+ END as Type_of_balance,
+ count(*) as total , sum(Exited)as churned ,
+ Round(sum(exited)*100 / count(*) , 2) as churned_rate
+ from Bank_churn
+ group by Type_of_balance 
+ order by Type_of_balance ;
